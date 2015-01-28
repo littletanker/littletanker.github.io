@@ -1,0 +1,283 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>littletanker</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+
+
+Google最近发布了Android Studio 1.0正式版，作为一个Android开发者不能不紧跟技术潮流，废话少说，本文将介绍在Android Studio上配置Git，并通过Git上传代码。
+
+
+----------
+
+
+**准备工作**
+
+ 1. [Android Studio ,本文使用的是当时最新版 Android Studio v1.0.1][1]
+
+
+ 2. [Git for Windows][2]
+
+
+  安装完AS和Git Gui工具后，在AS上设置Git路径
+  
+  **File > Settings > Version Control > Git**
+  
+    ![此处输入图片的描述][3]
+
+
+  
+
+
+----------
+
+**第一步：开启git**
+
+**VCS > Enable Version Control Integration > select "Git"**
+
+![此处输入图片的描述][4]
+
+开启git之后，文件变成红色。
+
+![此处输入图片的描述][5]
+
+----------
+
+**第二步：添加远程库**
+
+这一步不能通过AS完成，AS目前没有提供这个功能，所以我们只能通过Git Base来操作。
+
+ 1. 打开Git Base，进入项目目录
+ 
+    ![此处输入图片的描述][6]
+ 2. Git Base > 输入添加远程库命令
+ 
+    前提是已经创建了远程库，而已库必须干净，不能包含任何文件包括readme文件，这里已国内osc git为例。
+
+> git remote add origin https://git.oschina.net/xxxx/ASGit.git
+
+![此处输入图片的描述][7]
+      
+----------
+**第三步：添加项目到git 版本控制**
+
+   首先 **VCS > Git > Add**
+    ![此处输入图片的描述][8]
+    成功添加后文件变成绿色。
+    ![此处输入图片的描述][9]
+
+ ----------   
+**第四步：commit到git 服务器**    
+**VCS > Commit Changes...**
+![此处输入图片的描述][10]
+
+若选择commit and push将跳到第五步的操作
+
+----------
+
+**第五步：push到git 服务器**    
+
+**VCS >Git > Push...**
+
+![此处输入图片的描述][11]
+
+  勾选分支，点击push
+    
+![此处输入图片的描述][12]
+
+![此处输入图片的描述][13]
+
+至此，已经提交成功！可以做其他的一些操作，如commit，create branch等。
+
+  [1]: http://developer.android.com/sdk/index.html
+  [2]: http://git-scm.com/downloads
+  [3]: http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128154523.png
+  [4]: http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128161619.png
+  [5]: http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128161659.png
+  [6]: http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128162348.png
+  [7]: http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128163029.png
+  [8]: http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128163304.png
+  [9]: http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128163643.png
+  [10]: http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128164510.png
+  [11]: http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128164805.png
+  [12]: http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128165137.png
+  [13]: http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128165308.png
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<p>Google最近发布了Android Studio 1.0正式版，作为一个Android开发者不能不紧跟技术潮流，废话少说，本文将介绍在Android Studio上配置Git，并通过Git上传代码。</p>
+
+<hr>
+
+<p><strong>准备工作</strong></p>
+
+<ol>
+<li><p><a href="http://developer.android.com/sdk/index.html">Android Studio ,本文使用的是当时最新版 Android Studio v1.0.1</a></p></li>
+<li><p><a href="http://git-scm.com/downloads">Git for Windows</a></p>
+
+<p>安装完AS和Git Gui工具后，在AS上设置Git路径</p>
+
+<p><strong>File &gt; Settings &gt; Version Control &gt; Git</strong></p>
+
+<p><img src="http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128154523.png" alt="此处输入图片的描述" title=""></p></li>
+</ol>
+
+<hr>
+
+<p><strong>第一步：开启git</strong></p>
+
+<p><strong>VCS &gt; Enable Version Control Integration &gt; select "Git"</strong></p>
+
+<p><img src="http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128161619.png" alt="此处输入图片的描述" title=""></p>
+
+<p>开启git之后，文件变成红色。</p>
+
+<p><img src="http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128161659.png" alt="此处输入图片的描述" title=""></p>
+
+<hr>
+
+<p><strong>第二步：添加远程库</strong></p>
+
+<p>这一步不能通过AS完成，AS目前没有提供这个功能，所以我们只能通过Git Base来操作。</p>
+
+<ol>
+<li><p>打开Git Base，进入项目目录</p>
+
+<p><img src="http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128162348.png" alt="此处输入图片的描述" title=""></p></li>
+<li><p>Git Base &gt; 输入添加远程库命令</p>
+
+<p>前提是已经创建了远程库，而已库必须干净，不能包含任何文件包括readme文件，这里已国内osc git为例。</p></li>
+</ol>
+
+<blockquote>
+  <p>git remote add origin https://git.oschina.net/xxxx/ASGit.git</p>
+</blockquote>
+
+<p><img src="http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128163029.png" alt="此处输入图片的描述" title=""></p>
+
+<hr>
+
+<p><strong>第三步：添加项目到git 版本控制</strong></p>
+
+<p>首先 <strong>VCS &gt; Git &gt; Add</strong>
+    <img src="http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128163304.png" alt="此处输入图片的描述" title="">
+    成功添加后文件变成绿色。
+    <img src="http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128163643.png" alt="此处输入图片的描述" title=""></p>
+
+<hr>
+
+<p><strong>第四步：commit到git 服务器</strong> <br>
+<strong>VCS &gt; Commit Changes...</strong>
+<img src="http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128164510.png" alt="此处输入图片的描述" title=""></p>
+
+<p>若选择commit and push将跳到第五步的操作</p>
+
+<hr>
+
+<p><strong>第五步：push到git 服务器</strong>    </p>
+
+<p><strong>VCS &gt;Git &gt; Push...</strong></p>
+
+<p><img src="http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128164805.png" alt="此处输入图片的描述" title=""></p>
+
+<p>勾选分支，点击push</p>
+
+<p><img src="http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128165137.png" alt="此处输入图片的描述" title=""></p>
+
+<p><img src="http://7u2r57.com1.z0.glb.clouddn.com/QQ%E6%88%AA%E5%9B%BE20150128165308.png" alt="此处输入图片的描述" title=""></p>
+
+<p>至此，已经提交成功！可以做其他的一些操作，如commit，create branch等。</p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2015</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "as-git.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
