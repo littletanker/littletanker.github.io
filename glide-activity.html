@@ -1,0 +1,663 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>littletanker</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+ - 简述
+
+    在泰国举行的谷歌开发者论坛上，谷歌为我们介绍了一个名叫 Glide 的图片加载库，作者是bumptech。这个库被广泛的运用在google的开源项目中，包括2014年google I/O大会上发布的官方app。对于一个图片加载库，它在内存管理做的非常优秀，但本文主要分析它另外一个特点，就是Glide的生命周期概念，与activity/fragment的生命周期进行绑定，对请求进行`pause，resume，clear`。
+
+ - 实现分析
+    Glide实现这一功能，主要涉及到`com.bumptech.glide.manager`包下的这几个类。
+
+        ActivityFragmentLifecycle 
+        ApplicationLifeLifecycle 
+        Lifecycle 
+        LifeCycleListener 
+        RequestManagerFragment 
+        RequestManagerRetriever
+        SupportRequestManagerFragment
+
+
+
+    `com.bumptech.glide`包下的
+    
+
+ 
+
+        RequestManager
+
+    从源码可以看出`Glide.with(context)`返回了一个`RequestManager`对象，而`.with()`接受的参数可以是activity,fragmentActivity，fragment,context。
+
+
+        **
+         * Begin a load with Glide by passing in a context.
+         *
+         * 
+         *     Any requests started using a context will only have the application level options applied and will not be
+         *     started or stopped based on lifecycle events. In general, loads should be started at the level the result
+         *     will be used in. If the resource will be used in a view in a child fragment,
+         *     the load should be started with {@link #with(android.app.Fragment)}} using that child fragment. Similarly,
+         *     if the resource will be used in a view in the parent fragment, the load should be started with
+         *     {@link #with(android.app.Fragment)} using the parent fragment. In the same vein, if the resource will be used
+         *     in a view in an activity, the load should be started with {@link #with(android.app.Activity)}}.
+         * </p>
+         *
+         * 
+         *  This method is appropriate for resources that will be used outside of the normal fragment or activity
+         * lifecycle (For example in services, or for notification thumbnails).
+         *
+         * @see #with(android.app.Activity)
+         * @see #with(android.app.Fragment)
+         * @see #with(android.support.v4.app.Fragment)
+         * @see #with(android.support.v4.app.FragmentActivity)
+         *
+         * @param context Any context, will not be retained.
+         * @return A RequestManager for the top level application that can be used to start a load.
+         */
+        public static RequestManager with(Context context) {
+            RequestManagerRetriever retriever = RequestManagerRetriever.get();
+            return retriever.get(context);
+        }
+        
+        /**
+         * Begin a load with Glide that will be tied to the given {@link android.app.Activity}'s lifecycle and that uses the
+         * given {@link Activity}'s default options.
+         *
+         * @param activity The activity to use.
+         * @return A RequestManager for the given activity that can be used to start a load.
+         */
+        public static RequestManager with(Activity activity) {
+            RequestManagerRetriever retriever = RequestManagerRetriever.get();
+            return retriever.get(activity);
+        }
+        
+        /**
+         * Begin a load with Glide that will tied to the give {@link android.support.v4.app.FragmentActivity}'s lifecycle
+         * and that uses the given {@link android.support.v4.app.FragmentActivity}'s default options.
+         *
+         * @param activity The activity to use.
+         * @return A RequestManager for the given FragmentActivity that can be used to start a load.
+         */
+        public static RequestManager with(FragmentActivity activity) {
+            RequestManagerRetriever retriever = RequestManagerRetriever.get();
+            return retriever.get(activity);
+        }
+        
+        /**
+         * Begin a load with Glide that will be tied to the given {@link android.app.Fragment}'s lifecycle and that uses
+         * the given {@link android.app.Fragment}'s default options.
+         *
+         * @param fragment The fragment to use.
+         * @return A RequestManager for the given Fragment that can be used to start a load.
+         */
+        @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+        public static RequestManager with(android.app.Fragment fragment) {
+            RequestManagerRetriever retriever = RequestManagerRetriever.get();
+            return retriever.get(fragment);
+        }
+        
+        /**
+         * Begin a load with Glide that will be tied to the given {@link android.support.v4.app.Fragment}'s lifecycle and
+         * that uses the given {@link android.support.v4.app.Fragment}'s default options.
+         *
+         * @param fragment The fragment to use.
+         * @return A RequestManager for the given Fragment that can be used to start a load.
+         */
+        public static RequestManager with(Fragment fragment) {
+            RequestManagerRetriever retriever = RequestManagerRetriever.get();
+            return retriever.get(fragment);
+        }
+
+
+    其中`RequestManagerRetriever.get()`只是获取一个单例对象，这里以`retriver.get(activity)`，看源码
+    
+        public RequestManager get(FragmentActivity activity) {
+        if (Util.isOnBackgroundThread()) {
+            return get(activity.getApplicationContext());
+        } else {
+            assertNotDestroyed(activity);
+            FragmentManager fm = activity.getSupportFragmentManager();
+            return supportFragmentGet(activity, fm);
+        }
+        }
+        RequestManager supportFragmentGet(Context context, FragmentManager fm) {
+        SupportRequestManagerFragment current = getSupportRequestManagerFragment(fm);
+        RequestManager requestManager = current.getRequestManager();
+        if (requestManager == null) {
+            requestManager = new RequestManager(context, current.getLifecycle(), current.getRequestManagerTreeNode());
+            current.setRequestManager(requestManager);
+        }
+        return requestManager;
+        }
+        SupportRequestManagerFragment getSupportRequestManagerFragment(final FragmentManager fm) {
+        SupportRequestManagerFragment current = (SupportRequestManagerFragment) fm.findFragmentByTag(
+            FRAGMENT_TAG);
+        if (current == null) {
+            current = pendingSupportRequestManagerFragments.get(fm);
+            if (current == null) {
+                current = new SupportRequestManagerFragment();
+                pendingSupportRequestManagerFragments.put(fm, current);
+                fm.beginTransaction().add(current, FRAGMENT_TAG).commitAllowingStateLoss();
+                handler.obtainMessage(ID_REMOVE_SUPPORT_FRAGMENT_MANAGER, fm).sendToTarget();
+            }
+        }
+        return current;
+        }
+
+    从源码我们可以发现，通过activity生成了一个`SupportRequestManagerFragment`，
+
+        private final ActivityFragmentLifecycle lifecycle;
+        public SupportRequestManagerFragment() {
+            this(new ActivityFragmentLifecycle());
+        }
+        public SupportRequestManagerFragment(ActivityFragmentLifecycle lifecycle) {
+            this.lifecycle = lifecycle;
+        }
+
+    而这个`SupportRequestManagerFragment`内部重写了一些关于fragment生命周期的方法。
+   
+
+        @Override
+        public void onStart() {
+            super.onStart();
+            lifecycle.onStart();
+        }
+        
+        @Override
+        public void onStop() {
+            super.onStop();
+            lifecycle.onStop();
+        }
+        
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            lifecycle.onDestroy();
+        }
+        
+        @Override
+        public void onLowMemory() {
+            super.onLowMemory();
+            // If an activity is re-created, onLowMemory may be called before a manager is ever set.
+            // See #329.
+            if (requestManager != null) {
+                requestManager.onLowMemory();
+            }
+        }
+
+
+    当activity执行到相应生命周期时，`SupportRequestManagerFragment`时就会执行到对应的方法，而`ActivityFragmentLifecycle`是一个实现`Lifecycle`接口的类，`Lifecycle`只定义了一个方法。
+    
+        /**
+         * Adds the given listener to the set of listeners managed by this Lifecycle implementation.
+         */
+        void addListener(LifecycleListener listener);
+
+    `LifecycleListener`是一个接口，定义了三个方法。
+    
+        /**
+         * Callback for when {@link android.app.Fragment#onStart()}} or {@link android.app.Activity#onStart()} is called.
+         */
+        void onStart();
+    
+        /**
+         * Callback for when {@link android.app.Fragment#onStop()}} or {@link android.app.Activity#onStop()}} is called.
+         */
+        void onStop();
+    
+        /**
+         * Callback for when {@link android.app.Fragment#onDestroy()}} or {@link android.app.Activity#onDestroy()} is
+         * called.
+         */
+        void onDestroy();
+        
+    在实现类 `ActivityFragmentLifecycle`中
+
+        void onStart() {
+            isStarted = true;
+            for (LifecycleListener lifecycleListener : Util.getSnapshot(lifecycleListeners)) {
+                lifecycleListener.onStart();
+            }
+        }
+        void onStop() {
+                isStarted = false;
+                for (LifecycleListener lifecycleListener : Util.getSnapshot(lifecycleListeners)) {
+                    lifecycleListener.onStop();
+                }
+            }
+    
+        void onDestroy() {
+            isDestroyed = true;
+            for (LifecycleListener lifecycleListener : Util.getSnapshot(lifecycleListeners)) {
+                lifecycleListener.onDestroy();
+            }
+        }
+        
+    最后通过`lifecycleListener`执行了`onstart/onstop/ondestory`的方法，而我们文章开始提到的`RequestManager`通过实现    
+`LifecycleListener`的接口，形成一个闭环。`RequestManager`实现的方法如下。
+
+        /**
+         * Lifecycle callback that registers for connectivity events (if the android.permission.ACCESS_NETWORK_STATE
+         * permission is present) and restarts failed or paused requests.
+         */
+        @Override
+        public void onStart() {
+            // onStart might not be called because this object may be created after the fragment/activity's onStart method.
+            resumeRequests();
+        }
+    
+        /**
+         * Lifecycle callback that unregisters for connectivity events (if the android.permission.ACCESS_NETWORK_STATE
+         * permission is present) and pauses in progress loads.
+         */
+        @Override
+        public void onStop() {
+            pauseRequests();
+        }
+    
+        /**
+         * Lifecycle callback that cancels all in progress requests and clears and recycles resources for all completed
+         * requests.
+         */
+        @Override
+        public void onDestroy() {
+            requestTracker.clearRequests();
+        }
+
+    可以看出来，就是在这里实现了请求的继续，暂停和清理。到这里`Glide`请求与`activity/fragment`生命周期的绑定已经分析完成。
+    
+
+ - 总结
+    总的来说，`Glide`通过传入`activity/fragment`参数生成一个不可见的`fragment`，当对应的`activity/fragment`生命周期发生改变的时候就会自动通知到这个不可见fragment，再通过`LifecycleListener`和`Lifecycle`来操作相应的暂停，继续。
+    
+    
+
+    
+
+
+
+    
+    
+    
+    
+    
+    
+    
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<ul>
+<li><p>简述</p>
+
+<p>在泰国举行的谷歌开发者论坛上，谷歌为我们介绍了一个名叫 Glide 的图片加载库，作者是bumptech。这个库被广泛的运用在google的开源项目中，包括2014年google I/O大会上发布的官方app。对于一个图片加载库，它在内存管理做的非常优秀，但本文主要分析它另外一个特点，就是Glide的生命周期概念，与activity/fragment的生命周期进行绑定，对请求进行<code>pause，resume，clear</code>。</p></li>
+<li><p>实现分析
+Glide实现这一功能，主要涉及到<code>com.bumptech.glide.manager</code>包下的这几个类。</p>
+
+<pre><code>ActivityFragmentLifecycle 
+ApplicationLifeLifecycle 
+Lifecycle 
+LifeCycleListener 
+RequestManagerFragment 
+RequestManagerRetriever
+SupportRequestManagerFragment
+</code></pre>
+
+<p><code>com.bumptech.glide</code>包下的</p>
+
+<pre><code>RequestManager
+</code></pre>
+
+<p>从源码可以看出<code>Glide.with(context)</code>返回了一个<code>RequestManager</code>对象，而<code>.with()</code>接受的参数可以是activity,fragmentActivity，fragment,context。</p>
+
+<pre><code>**
+ * Begin a load with Glide by passing in a context.
+ *
+ * 
+ *     Any requests started using a context will only have the application level options applied and will not be
+ *     started or stopped based on lifecycle events. In general, loads should be started at the level the result
+ *     will be used in. If the resource will be used in a view in a child fragment,
+ *     the load should be started with {@link #with(android.app.Fragment)}} using that child fragment. Similarly,
+ *     if the resource will be used in a view in the parent fragment, the load should be started with
+ *     {@link #with(android.app.Fragment)} using the parent fragment. In the same vein, if the resource will be used
+ *     in a view in an activity, the load should be started with {@link #with(android.app.Activity)}}.
+ * &lt;/p&gt;
+ *
+ * 
+ *  This method is appropriate for resources that will be used outside of the normal fragment or activity
+ * lifecycle (For example in services, or for notification thumbnails).
+ *
+ * @see #with(android.app.Activity)
+ * @see #with(android.app.Fragment)
+ * @see #with(android.support.v4.app.Fragment)
+ * @see #with(android.support.v4.app.FragmentActivity)
+ *
+ * @param context Any context, will not be retained.
+ * @return A RequestManager for the top level application that can be used to start a load.
+ */
+public static RequestManager with(Context context) {
+    RequestManagerRetriever retriever = RequestManagerRetriever.get();
+    return retriever.get(context);
+}
+
+
+/**
+ * Begin a load with Glide that will be tied to the given {@link android.app.Activity}'s lifecycle and that uses the
+ * given {@link Activity}'s default options.
+ *
+ * @param activity The activity to use.
+ * @return A RequestManager for the given activity that can be used to start a load.
+ */
+public static RequestManager with(Activity activity) {
+    RequestManagerRetriever retriever = RequestManagerRetriever.get();
+    return retriever.get(activity);
+}
+
+
+/**
+ * Begin a load with Glide that will tied to the give {@link android.support.v4.app.FragmentActivity}'s lifecycle
+ * and that uses the given {@link android.support.v4.app.FragmentActivity}'s default options.
+ *
+ * @param activity The activity to use.
+ * @return A RequestManager for the given FragmentActivity that can be used to start a load.
+ */
+public static RequestManager with(FragmentActivity activity) {
+    RequestManagerRetriever retriever = RequestManagerRetriever.get();
+    return retriever.get(activity);
+}
+
+
+/**
+ * Begin a load with Glide that will be tied to the given {@link android.app.Fragment}'s lifecycle and that uses
+ * the given {@link android.app.Fragment}'s default options.
+ *
+ * @param fragment The fragment to use.
+ * @return A RequestManager for the given Fragment that can be used to start a load.
+ */
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+public static RequestManager with(android.app.Fragment fragment) {
+    RequestManagerRetriever retriever = RequestManagerRetriever.get();
+    return retriever.get(fragment);
+}
+
+
+/**
+ * Begin a load with Glide that will be tied to the given {@link android.support.v4.app.Fragment}'s lifecycle and
+ * that uses the given {@link android.support.v4.app.Fragment}'s default options.
+ *
+ * @param fragment The fragment to use.
+ * @return A RequestManager for the given Fragment that can be used to start a load.
+ */
+public static RequestManager with(Fragment fragment) {
+    RequestManagerRetriever retriever = RequestManagerRetriever.get();
+    return retriever.get(fragment);
+}
+</code></pre>
+
+<p>其中<code>RequestManagerRetriever.get()</code>只是获取一个单例对象，这里以<code>retriver.get(activity)</code>，看源码</p>
+
+<pre><code>public RequestManager get(FragmentActivity activity) {
+if (Util.isOnBackgroundThread()) {
+    return get(activity.getApplicationContext());
+} else {
+    assertNotDestroyed(activity);
+    FragmentManager fm = activity.getSupportFragmentManager();
+    return supportFragmentGet(activity, fm);
+}
+}
+RequestManager supportFragmentGet(Context context, FragmentManager fm) {
+SupportRequestManagerFragment current = getSupportRequestManagerFragment(fm);
+RequestManager requestManager = current.getRequestManager();
+if (requestManager == null) {
+    requestManager = new RequestManager(context, current.getLifecycle(), current.getRequestManagerTreeNode());
+    current.setRequestManager(requestManager);
+}
+return requestManager;
+}
+SupportRequestManagerFragment getSupportRequestManagerFragment(final FragmentManager fm) {
+SupportRequestManagerFragment current = (SupportRequestManagerFragment) fm.findFragmentByTag(
+    FRAGMENT_TAG);
+if (current == null) {
+    current = pendingSupportRequestManagerFragments.get(fm);
+    if (current == null) {
+        current = new SupportRequestManagerFragment();
+        pendingSupportRequestManagerFragments.put(fm, current);
+        fm.beginTransaction().add(current, FRAGMENT_TAG).commitAllowingStateLoss();
+        handler.obtainMessage(ID_REMOVE_SUPPORT_FRAGMENT_MANAGER, fm).sendToTarget();
+    }
+}
+return current;
+}
+</code></pre>
+
+<p>从源码我们可以发现，通过activity生成了一个<code>SupportRequestManagerFragment</code>，</p>
+
+<pre><code>private final ActivityFragmentLifecycle lifecycle;
+public SupportRequestManagerFragment() {
+    this(new ActivityFragmentLifecycle());
+}
+public SupportRequestManagerFragment(ActivityFragmentLifecycle lifecycle) {
+    this.lifecycle = lifecycle;
+}
+</code></pre>
+
+<p>而这个<code>SupportRequestManagerFragment</code>内部重写了一些关于fragment生命周期的方法。</p>
+
+<pre><code>@Override
+public void onStart() {
+    super.onStart();
+    lifecycle.onStart();
+}
+
+
+@Override
+public void onStop() {
+    super.onStop();
+    lifecycle.onStop();
+}
+
+
+@Override
+public void onDestroy() {
+    super.onDestroy();
+    lifecycle.onDestroy();
+}
+
+
+@Override
+public void onLowMemory() {
+    super.onLowMemory();
+    // If an activity is re-created, onLowMemory may be called before a manager is ever set.
+    // See #329.
+    if (requestManager != null) {
+        requestManager.onLowMemory();
+    }
+}
+</code></pre>
+
+<p>当activity执行到相应生命周期时，<code>SupportRequestManagerFragment</code>时就会执行到对应的方法，而<code>ActivityFragmentLifecycle</code>是一个实现<code>Lifecycle</code>接口的类，<code>Lifecycle</code>只定义了一个方法。</p>
+
+<pre><code>/**
+ * Adds the given listener to the set of listeners managed by this Lifecycle implementation.
+ */
+void addListener(LifecycleListener listener);
+</code></pre>
+
+<p><code>LifecycleListener</code>是一个接口，定义了三个方法。</p>
+
+<pre><code>/**
+ * Callback for when {@link android.app.Fragment#onStart()}} or {@link android.app.Activity#onStart()} is called.
+ */
+void onStart();
+
+
+/**
+ * Callback for when {@link android.app.Fragment#onStop()}} or {@link android.app.Activity#onStop()}} is called.
+ */
+void onStop();
+
+
+/**
+ * Callback for when {@link android.app.Fragment#onDestroy()}} or {@link android.app.Activity#onDestroy()} is
+ * called.
+ */
+void onDestroy();
+</code></pre>
+
+<p>在实现类 <code>ActivityFragmentLifecycle</code>中</p>
+
+<pre><code>void onStart() {
+    isStarted = true;
+    for (LifecycleListener lifecycleListener : Util.getSnapshot(lifecycleListeners)) {
+        lifecycleListener.onStart();
+    }
+}
+void onStop() {
+        isStarted = false;
+        for (LifecycleListener lifecycleListener : Util.getSnapshot(lifecycleListeners)) {
+            lifecycleListener.onStop();
+        }
+    }
+
+
+void onDestroy() {
+    isDestroyed = true;
+    for (LifecycleListener lifecycleListener : Util.getSnapshot(lifecycleListeners)) {
+        lifecycleListener.onDestroy();
+    }
+}
+</code></pre>
+
+<p>最后通过<code>lifecycleListener</code>执行了<code>onstart/onstop/ondestory</code>的方法，而我们文章开始提到的<code>RequestManager</code>通过实现 <br>
+<code>LifecycleListener</code>的接口，形成一个闭环。<code>RequestManager</code>实现的方法如下。</p>
+
+<pre><code>/**
+ * Lifecycle callback that registers for connectivity events (if the android.permission.ACCESS_NETWORK_STATE
+ * permission is present) and restarts failed or paused requests.
+ */
+@Override
+public void onStart() {
+    // onStart might not be called because this object may be created after the fragment/activity's onStart method.
+    resumeRequests();
+}
+
+
+/**
+ * Lifecycle callback that unregisters for connectivity events (if the android.permission.ACCESS_NETWORK_STATE
+ * permission is present) and pauses in progress loads.
+ */
+@Override
+public void onStop() {
+    pauseRequests();
+}
+
+
+/**
+ * Lifecycle callback that cancels all in progress requests and clears and recycles resources for all completed
+ * requests.
+ */
+@Override
+public void onDestroy() {
+    requestTracker.clearRequests();
+}
+</code></pre>
+
+<p>可以看出来，就是在这里实现了请求的继续，暂停和清理。到这里<code>Glide</code>请求与<code>activity/fragment</code>生命周期的绑定已经分析完成。</p></li>
+<li><p>总结
+总的来说，<code>Glide</code>通过传入<code>activity/fragment</code>参数生成一个不可见的<code>fragment</code>，当对应的<code>activity/fragment</code>生命周期发生改变的时候就会自动通知到这个不可见fragment，再通过<code>LifecycleListener</code>和<code>Lifecycle</code>来操作相应的暂停，继续。</p></li>
+</ul>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2015</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "glide-activity.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
