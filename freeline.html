@@ -1,0 +1,230 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>littletanker</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+**Freeline是在Android平台上的一个基于动态替换的编译方案，能够实现快速的增量编译。**<br />
+
+
+
+> 集成方法
+
+目前最新版本是0.7.3.1
+
+1.在project层的build.gradle添加以下代码
+```
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.antfortune.freeline:gradle:0.7.3.1'
+    }
+}
+```
+
+2.在application层的build.gradle添加以下代码
+``apply plugin: 'com.antfortune.freeline'``
+
+5.0以下的机子需要加入
+```
+android{
+
+freeline {
+        applicationProxy false
+    }
+}
+```
+
+5.0以下的机子需要在Application类的onCreate方法加入
+``FreelineCore.init(YxApplication.this);``
+
+3.在控制台执行``./gradlew initFreeline -Pmirror`` 初始化freeline
+
+4.下载freeline 的AS插件
+Preferences → Plugins → Browse repositories 搜索 freeline 安装<br />
+
+> 运行
+
+点击蓝色按钮直接运行   
+![QQ20161011-1](/uploads/eedb71a04a19a0b3ee03817cb5a85b0f/QQ20161011-1.png)
+
+或使用命令行``python freeline.py``,加入``-d``参数可查看编译日志，``-f``是强制全量编译
+
+目前已知的问题是只能编译debug包和只支持一台手机连接，下面是官方提供的支持编译类型   
+   
+![QQ20161011-2_2x](/uploads/a37222f731af05dc09971ece3b45e3f4/QQ20161011-2_2x.png)<br /><br />
+
+个人心得：使用上了基本都是秒级的编译速度，在快速修改验证bug上特别好使，如果人品不好在编译过程中出现异常，可以联系作者在github在提issue或者加入作者的微信群讨论。<br/>
+
+![674807D6FD68BCE9D42B3D84267AAD1E](/uploads/cae8b9f70092ed17beaa95d89d9bdde5/674807D6FD68BCE9D42B3D84267AAD1E.jpg)
+
+参考资料    
+
+[Freeline - Android平台上的秒级编译方案][1]   
+ [Freeline][2]
+
+
+  [1]: https://yq.aliyun.com/articles/59122
+  [2]: https://github.com/alibaba/freeline
+
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<p><strong>Freeline是在Android平台上的一个基于动态替换的编译方案，能够实现快速的增量编译。</strong><br></p>
+
+<blockquote>
+  <p>集成方法</p>
+</blockquote>
+
+<p>目前最新版本是0.7.3.1</p>
+
+<p>1.在project层的build.gradle添加以下代码</p>
+
+<pre><code>buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.antfortune.freeline:gradle:0.7.3.1'
+    }
+}
+</code></pre>
+
+<p>2.在application层的build.gradle添加以下代码
+<code>apply plugin: 'com.antfortune.freeline'</code></p>
+
+<p>5.0以下的机子需要加入</p>
+
+<pre><code>android{
+
+freeline {
+        applicationProxy false
+    }
+}
+</code></pre>
+
+<p>5.0以下的机子需要在Application类的onCreate方法加入
+<code>FreelineCore.init(YxApplication.this);</code></p>
+
+<p>3.在控制台执行<code>./gradlew initFreeline -Pmirror</code> 初始化freeline</p>
+
+<p>4.下载freeline 的AS插件
+Preferences → Plugins → Browse repositories 搜索 freeline 安装<br></p>
+
+<blockquote>
+  <p>运行</p>
+</blockquote>
+
+<p>点击蓝色按钮直接运行 <br>
+<img src="/uploads/eedb71a04a19a0b3ee03817cb5a85b0f/QQ20161011-1.png" alt="QQ20161011-1" title=""></p>
+
+<p>或使用命令行<code>python freeline.py</code>,加入<code>-d</code>参数可查看编译日志，<code>-f</code>是强制全量编译</p>
+
+<p>目前已知的问题是只能编译debug包和只支持一台手机连接，下面是官方提供的支持编译类型   </p>
+
+<p><img src="/uploads/a37222f731af05dc09971ece3b45e3f4/QQ20161011-2_2x.png" alt="QQ20161011-2_2x" title=""><br><br></p>
+
+<p>个人心得：使用上了基本都是秒级的编译速度，在快速修改验证bug上特别好使，如果人品不好在编译过程中出现异常，可以联系作者在github在提issue或者加入作者的微信群讨论。<br></p>
+
+<p><img src="/uploads/cae8b9f70092ed17beaa95d89d9bdde5/674807D6FD68BCE9D42B3D84267AAD1E.jpg" alt="674807D6FD68BCE9D42B3D84267AAD1E" title=""></p>
+
+<p>参考资料    </p>
+
+<p><a href="https://yq.aliyun.com/articles/59122">Freeline - Android平台上的秒级编译方案</a> <br>
+ <a href="https://github.com/alibaba/freeline">Freeline</a></p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2015</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "freeline.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
