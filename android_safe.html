@@ -1,0 +1,211 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="Keywords" content="blog"/>
+    <meta name="Description" content="blog"/>
+    <title>littletanker</title>
+    <link rel="shortcut icon" href="/static/favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+</head>
+<body>
+<div class="main">
+    <div class="header">
+    	<ul id="pages">
+            <li><a href="/">home</a></li>
+            <li><a href="/#/tags">tags</a></li>
+            <li><a href="/#/archive">archive</a></li>
+    	</ul>
+    </div>
+	<div class="wrap-header">
+	<h1>
+    <a href="/" id="title"></a>
+	</h1>
+	</div>
+<div id="md" style="display: none;">
+<!-- markdown -->
+<H1>app安全问题</H1>
+<h4>一、AndroidManifest.xml中：需要将debuggable显示设置成false，allowBackup显示设置成false</h4>
+<br />
+\<application
+        android:debuggable="false"
+        android:allowBackup="false"\>
+<br />
+原因：防止动态调试以及保护app私有数据
+<h4>二、AndroidManifest.xml中：非公开的四大组件activity、service、receiver、provider 需要将exported显示设置成false</h4>
+<br />
+\<activity  android:exported="false" /\>  
+原因：防止拒绝服务攻击、以及provider数据泄密
+<h4>三、AndroidManifest.xml中：公开的组件activity、service、receiver 需要在使用Intent前加上如下代码进行拒绝服务检测</h4>
+<br/>
+<pre><code>
+public static final boolean isValid(Intent intent) {
+        if (intent == null) {
+            return false;
+        }
+        try {
+            intent.hasExtra("");
+        } catch (Exception ClassNotFoundException) {
+            return false;
+        }
+        return true;
+ }
+</code></pre>
+<h4>四、AndroidManifest.xml中：公开的组件provider，不要使用拼接成select语句，以及要对uri中的path进行过滤 </h4>
+<pre><code>
+       StringBuilder builder = new StringBuilder();
+        builder.append("select")
+                .append(" ")
+                .append("name")
+                .append(" ")
+                .append("from")
+                .append(" ")
+                .append("user");
+</code></pre>
+<br/>
+检测Uri 中的是否包含"../"字符
+<br/>
+[详情参考](http://mp.weixin.qq.com/s?__biz=MzIwMTI4Nzk5Ng==&mid=2650219132&idx=1&sn=5430dfd31967ecb2ef56654952c8354e&scene=0#wechat_redirect)
+<br/>
+原因：防止SQL注入、以及目录遍历
+<h4>五、apk签名不要用通用签名，最好采用线上签名方式</h4>
+<br/>
+[详情参考](http://mp.weixin.qq.com/s?__biz=MzIwMTI4Nzk5Ng==&mid=2650219327&idx=1&sn=bb30ca0ecd678bf633a376cbaae1db87&scene=0#wechat_redirect)
+<br/>
+原因：防止包替换风险
+
+<!-- markdown end -->
+</div>
+<div class="entry" id="main">
+<!-- content -->
+<p></p><h1>app安全问题</h1><p></p>
+
+<h4>一、AndroidManifest.xml中：需要将debuggable显示设置成false，allowBackup显示设置成false</h4>
+
+<p><br>
+\<application android:debuggable="false" android:allowbackup="false" \="">
+<br>
+原因：防止动态调试以及保护app私有数据</application></p>
+
+<h4>二、AndroidManifest.xml中：非公开的四大组件activity、service、receiver、provider 需要将exported显示设置成false</h4>
+
+<p><br>
+\<activity android:exported="false" \=""> <br>
+原因：防止拒绝服务攻击、以及provider数据泄密</activity></p>
+
+<h4>三、AndroidManifest.xml中：公开的组件activity、service、receiver 需要在使用Intent前加上如下代码进行拒绝服务检测</h4>
+
+<p><br></p>
+
+<pre><code>
+public static final boolean isValid(Intent intent) {
+        if (intent == null) {
+            return false;
+        }
+        try {
+            intent.hasExtra("");
+        } catch (Exception ClassNotFoundException) {
+            return false;
+        }
+        return true;
+ }
+</code></pre>
+
+<h4>四、AndroidManifest.xml中：公开的组件provider，不要使用拼接成select语句，以及要对uri中的path进行过滤 </h4>
+
+<pre><code>
+       StringBuilder builder = new StringBuilder();
+        builder.append("select")
+                .append(" ")
+                .append("name")
+                .append(" ")
+                .append("from")
+                .append(" ")
+                .append("user");
+</code></pre>
+
+<p><br>
+检测Uri 中的是否包含"../"字符
+<br>
+<a href="http://mp.weixin.qq.com/s?__biz=MzIwMTI4Nzk5Ng==&amp;mid=2650219132&amp;idx=1&amp;sn=5430dfd31967ecb2ef56654952c8354e&amp;scene=0#wechat_redirect">详情参考</a>
+<br>
+原因：防止SQL注入、以及目录遍历</p>
+
+<h4>五、apk签名不要用通用签名，最好采用线上签名方式</h4>
+
+<p><br>
+<a href="http://mp.weixin.qq.com/s?__biz=MzIwMTI4Nzk5Ng==&amp;mid=2650219327&amp;idx=1&amp;sn=bb30ca0ecd678bf633a376cbaae1db87&amp;scene=0#wechat_redirect">详情参考</a>
+<br>
+原因：防止包替换风险</p>
+<!-- content end -->
+</div>
+<br>
+<br>
+    <div id="disqus_thread"></div>
+	<div class="footer">
+		<p>© Copyright 2015</p>
+	</div>
+</div>
+<script src="main.js"></script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ["\\(", "\\)"]], processEscapes: true}});
+</script>
+<script id="content" type="text/mustache">
+    <h1>{{title}}</h1>
+    <div class="tag">
+    {{date}}
+    {{#tags}}
+    <a href="/#/tag/{{name}}">#{{name}}</a>
+    {{/tags}}
+    </div>
+</script>
+<script id="pagesTemplate" type="text/mustache">
+    {{#pages}}
+    <li>
+        <a href="{{path}}">{{title}}</a>
+    </li>
+    {{/pages}}
+</script>
+<script>
+$(document).ready(function() {
+    $.ajax({
+        url: "main.json",
+        type: "GET",
+        dataType: "json",
+        success: function(data) {
+            $("#title").html(data.name);
+            var pagesTemplate = Hogan.compile($("#pagesTemplate").html());
+            var pagesHtml = pagesTemplate.render({"pages": data.pages});
+            $("#pages").append(pagesHtml);
+            //path
+            var path = "android_safe.html";
+            //path end
+            var now = 0;
+            for (var i = 0; i < data.posts.length; ++i)
+                if (path == data.posts[i].path)
+                    now = i;
+            var post = data.posts[now];
+            var tmp = post.tags.split(" ");
+            var tags = [];
+            for (var i = 0; i < tmp.length; ++i)
+                if (tmp[i].length > 0)
+                    tags.push({"name": tmp[i]});
+            var contentTemplate = Hogan.compile($("#content").html());
+            var contentHtml = contentTemplate.render({"title": post.title, "tags": tags, "date": post.date});
+            $("#main").prepend(contentHtml);
+            if (data.disqus_shortname.length > 0) {
+                var disqus_shortname = data.disqus_shortname;
+                (function() {
+                    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                })();
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
